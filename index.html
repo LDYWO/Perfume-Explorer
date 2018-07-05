@@ -1,0 +1,487 @@
+<!doctype html>
+<!--
+  Material Design Lite
+  Copyright 2015 Google Inc. All rights reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+
+    <title>Perfume Explorer</title>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://rawgit.com/tpreusse/radar-chart-d3/master/src/radar-chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.js"></script>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
+    <link rel="stylesheet" href="https://rawgit.com/tpreusse/radar-chart-d3/master/src/radar-chart.css">
+
+    <!-- Add to homescreen for Chrome on Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="icon" sizes="192x192" href="images/android-desktop.png">
+
+    <!-- Add to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Material Design Lite">
+    <link rel="apple-touch-icon-precomposed" href="images/ios-desktop.png">
+
+    <!-- Tile icon for Win8 (144x144 + tile color) -->
+    <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
+    <meta name="msapplication-TileColor" content="#3372DF">
+
+    <link rel="shortcut icon" href="images/favicon.png">
+
+    <!-- SEO: If your mobile URL is different from the desktop URL, add a canonical link to the desktop page https://developers.google.com/webmasters/smartphone-sites/feature-phones -->
+    <!--
+    <link rel="canonical" href="http://www.example.com/">
+    -->
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.light_blue-cyan.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script src = "https://storage.googleapis.com/code.getmdl.io/1.0.6/material.min.js">
+    </script>
+    <style>
+    #view-source {
+      position: fixed;
+      display: block;
+      right: 0;
+      bottom: 0;
+      margin-right: 40px;
+      margin-bottom: 40px;
+      z-index: 900;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
+      <header class="demo-header mdl-layout__header mdl-color--white mdl-color-text--grey-600">
+        <div class="mdl-layout__header-row">
+          <span class="mdl-layout-title">Perfume Explorer</span>
+        </div>
+        <div id="mySidenav" class="sidenav">
+          <div class="sidenav-title">Perfume Infor</div>
+          <div class="mdl-color--white mdl-cell mdl-cell--12-col mdl-grid--no-spacing">
+            <div class="mdl-cell mdl-cell--12-col">
+              <div class="mdl-card__supporting-text  mdl-card--border mdl-color-text--grey-600">
+                <div class="perfume-comparison-group">
+                  <text>Selected Perfumes</text>
+                  <text id="count" style="padding-left:0px; float: right; border-bottom: 1px groove #bababa;">0</text>
+                </div>
+                <div id="selectList">
+                </div>
+              </div>
+              <div class="mdl-card__supporting-text mdl-color-text--grey-600" id="subview">
+                <div class="perfume-comparison-group"><p>Comparison of Perfume</p></div>
+                <div id="img-container">
+                  <div>
+                      <img id="img"/>
+                      <img id="img0"/>
+                      <img id="img1"/>
+                      <img id="img2"/>
+                      <img id="img3"/>
+                      <img id="img4"/>
+                  </div>
+                  <select class="comparison-select-box">
+                    <option selected>Season</option>
+                    <option>Sillage</option>
+                    <option>Longevity</option>
+                    <option>Notes</option>
+                  </select>
+                  <div class="radar-container"><div class="radar-chart"></div></div>
+                  <div id="perfume-content">
+                    <div id="perfume-name"></div>
+                    <div id="perfume-brand"></div>
+                    <div id="perfume-gender"></div>
+                  </div>
+                  <div id="perfume-vote-barchart">
+                    <div id="perfume-vote"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div class="demo-drawer mdl-layout__drawer mdl-color--gray-100 mdl-color-text--black">
+        <header class="demo-drawer-header">
+          <span class="mdl-color-text--grey-600 control-panel">
+            <img style="width: 20px;height: 20px; margin-right: 20px" src="images/control_panel.png"/>
+            Control Panel
+          </span>
+        </header>
+        <nav class="demo-navigation mdl-navigation mdl-color--gray-100">
+          <div class="dimension-group"><p>CIRCLE</p></div>
+          <div class="event-group">
+            <div class="dimension-icon">
+              <img style="width: 20px;height: 20px; margin-right: 20px" src="images/season.png"/>
+              <img style="width: 20px;height: 20px; margin-right: 20px" src="images/silliage.png"/>
+              <img style="width: 20px;height: 20px; margin-right: 20px" src="images/longevity.png"/>
+              <img style="width: 20px;height: 20px; margin-right: 20px" src="images/notes.png"/>
+            </div>
+            <div class="labels">
+              <p>Season</p>
+              <p>Sillage</p>
+              <p>Longevity</p>
+              <p>Notes</p>
+            </div>
+            <div class="container centered" >
+              <div class="card dimension-switch">
+                <label for="switch1" class="mdl-checkbox mdl-js-checkbox">
+                  <input type="checkbox" id="switch1" class = "mdl-checkbox__input" dimensions="spring,summer,autumn,winter" dsname ="Season"/><span class="switch"></span><span class="toggle"></span>
+                </label>
+              </div>
+              <div class="card dimension-switch">
+                <label for="switch2" class="mdl-checkbox mdl-js-checkbox">
+                  <input type="checkbox" id="switch2" class = "mdl-checkbox__input" dimensions="sillagesoft,sillagemoderate,sillageheavy,sillageenormous" dsname ="Sillage"/><span class="switch"></span><span class="toggle"></span>
+                </label>
+              </div>
+              <div class="card dimension-switch">
+                <label for="switch3" class="mdl-checkbox mdl-js-checkbox">
+                  <input type="checkbox" id="switch3" class = "mdl-checkbox__input" dimensions="longevitypoor,longevityweak,longevitymoderate,longevitylonglasting,longevityverylonglasting" dsname ="Longevity"/><span class="switch"></span><span class="toggle"></span>
+                </label>
+              </div>
+              <div class="card dimension-switch">
+                <label for="switch4" class="mdl-checkbox mdl-js-checkbox">
+                  <input type="checkbox" id="switch4" class = "mdl-checkbox__input" dimensions="MUSK__AMBER__ANIMALIC_SMELLS,SWEETS_AND_GOURMAND_SMELLS,RESINS_AND_BALSAMS,SPICES,WOODS_AND_MOSSES,BEVERAGES,CITRUS_SMELLS,NATURAL_AND_SYNTHETIC__POPULAR_AND_WEIRD,GREENS__HERBS_AND_FOUGERES,FRUITS__VEGETABLES_AND_NUTS,FLOWERS,WHITE_FLOWERS" dsname ="Notes"/><span class="switch"></span><span class="toggle"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="color-group"><p>NODE</p></div>
+          <div class="color-event-group">
+            <div class="color-icon">
+              <img style="width: 20px;height: 20px; margin-right: 20px" src="images/gender.png"/>
+              <img style="width: 20px;height: 20px; margin-right: 20px" src="images/day_night.png"/>
+              <img style="width: 20px;height: 20px; margin-right: 20px" src="images/rating.png"/>
+              <img style="width: 20px;height: 20px; margin-right: 20px" src="images/brand.png"/>
+            </div>
+            <div class="color-labels">
+              <p>Gender</p>
+              <p>Day/Night</p>
+              <p>Rating</p>
+              <p></p>
+            </div>
+
+            <div class="container color-centered">
+              <div class="card color-switch">
+                <label class = "mdl-radio mdl-js-radio" for="switch5">
+                  <input class = "mdl-radio__button" type="checkbox" id="switch5" dimensions="Gender"/><span class="switch"></span><span class="toggle"></span>
+                </label>
+              </div>
+              <div class="card color-switch">
+                <label class = "mdl-radio mdl-js-radio" for="switch6">
+                  <input class = "mdl-radio__button" type="checkbox" id="switch6" dimensions="day/night"/><span class="switch"></span><span class="toggle"></span>
+                </label>
+              </div>
+                <div class="card color-switch">
+                    <label class = "mdl-radio mdl-js-radio" for="switch7">
+                        <input class = "mdl-radio__button" type="checkbox" id="switch7" dimensions="Rating"/><span class="switch"></span><span class="toggle"></span>
+                    </label>
+                </div>
+              <div class="card color-switch">
+                <label class = "mdl-radio mdl-js-radio" for="switch8">
+                  <input class = "mdl-radio__button" type="checkbox" id="switch8" dimensions="Brand"/><span class="switch"></span><span class="toggle"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="brand-event-group">
+            <div>
+              <select class="select-box" disabled="disabled">
+                  <option selected value="1">Brand</option>
+                  <option>Christian Dior</option>
+                  <option>Guerlain</option>
+                  <option>Chanel</option>
+                  <option>Bvlgari</option>
+                  <option>Yves Saint Laurent</option>
+                  <option>Calvin Klein</option>
+                  <option>Hermès</option>
+                  <option>Tom Ford</option>
+                  <option>Giorgio Armani</option>
+                  <option>Givenchy</option>
+                  <option>Mugler</option>
+                  <option>Dolce&Gabbana</option>
+                  <option>Gucci</option>
+                  <option>Serge Lutens</option>
+                  <option>Versace</option>
+                  <option>Estée Lauder</option>
+                  <option>Burberry</option>
+                  <option>Lancome</option>
+                  <option>Prada</option>
+                  <option>Ralph Lauren</option>
+                  <option>Carolina Herrera</option>
+                  <option>Paco Rabanne</option>
+                  <option>Escada</option>
+                  <option>Britney Spears</option>
+                  <option>Creed</option>
+                  <option>Donna Karan</option>
+                  <option>Hugo Boss</option>
+                  <option>Jean Paul Gaultier</option>
+                  <option>Jo Malone London</option>
+                  <option>Kenzo</option>
+                  <option>Marc Jacobs</option>
+                  <option>Amouage</option>
+                  <option>Cartier</option>
+                  <option>Chloe</option>
+                  <option>Lalique</option>
+                  <option>Lolita Lempicka</option>
+                  <option>Narciso Rodriguez</option>
+                  <option>Van Cleef & Arpels</option>
+                  <option>Victoria`s Secret</option>
+                  <option>Cacharel</option>
+                  <option>Juicy Couture</option>
+                  <option>Lanvin</option>
+                  <option>Acqua di Parma</option>
+                  <option>Diptyque</option>
+                  <option>Elizabeth Arden</option>
+                  <option>Frederic Malle</option>
+                  <option>Jennifer Lopez</option>
+                  <option>L`Artisan Parfumeur</option>
+                  <option>Lacoste Fragrances</option>
+                  <option>Moschino</option>
+                  <option>Nina Ricci</option>
+                  <option>Rochas</option>
+                  <option>Annick Goutal</option>
+                  <option>Avon</option>
+                  <option>Comme des Garcons</option>
+                  <option>Montblanc</option>
+                  <option>Yves Rocher</option>
+                  <option>Aquolina</option>
+                  <option>Aramis</option>
+                  <option>Azzaro</option>
+                  <option>Bath and Body Works</option>
+                  <option>Boucheron</option>
+                  <option>Caron</option>
+                  <option>Clinique</option>
+                  <option>DSQUARED²</option>
+                  <option>Elie Saab</option>
+                  <option>Issey Miyake</option>
+                  <option>Laura Biagiotti</option>
+                  <option>Montale</option>
+                  <option>Paris Hilton</option>
+                  <option>Salvatore Ferragamo</option>
+                  <option>Vera Wang</option>
+                  <option>Viktor&Rolf</option>
+                  <option>Agent Provocateur</option>
+                  <option>Balenciaga</option>
+                  <option>Beyonce</option>
+                  <option>Bond No 9</option>
+                  <option>By Kilian</option>
+                  <option>Byredo</option>
+                  <option>Coty</option>
+                  <option>Davidoff</option>
+                  <option>Diesel</option>
+                  <option>Guess</option>
+                  <option>Hanae Mori</option>
+                  <option>Jessica Simpson</option>
+                  <option>John Varvatos</option>
+                  <option>Katy Perry</option>
+                  <option>Le Labo</option>
+                  <option>Nasomatto</option>
+                  <option>Pierre Balmain</option>
+                  <option>Rihanna</option>
+                  <option>Sarah Jessica Parker</option>
+                  <option>Valentino</option>
+                  <option>Al-Rehab</option>
+                  <option>Alexander McQueen</option>
+                  <option>Alfred Dunhill</option>
+                  <option>Atelier Cologne</option>
+                  <option>Chopard</option>
+                  <option>Christian Audigier</option>
+                  <option>Christina Aguilera</option>
+                  <option>Dana</option>
+                  <option>Emanuel Ungaro</option>
+                  <option>Fendi</option>
+                  <option>Frapin</option>
+                  <option>Gres</option>
+                  <option>Guy Laroche</option>
+                  <option>Halston</option>
+                  <option>Histoires de Parfums</option>
+                  <option>Jean Patou</option>
+                  <option>Jil Sander</option>
+                  <option>Joop!</option>
+                  <option>Juliette Has A Gun</option>
+                  <option>L`Erbolario</option>
+                  <option>L`Occitane en Provence</option>
+                  <option>Lush</option>
+                  <option>Madonna</option>
+                  <option>Maison Francis Kurkdjian</option>
+                  <option>Mariah Carey</option>
+                  <option>Michael Kors</option>
+                  <option>Molinard</option>
+                  <option>Oscar de la Renta</option>
+                  <option>Parfum d`Empire</option>
+                  <option>Penhaligon`s</option>
+                  <option>Robert Piguet</option>
+                  <option>Roberto Cavalli</option>
+                  <option>Salvador Dali</option>
+                  <option>Shiseido</option>
+                  <option>Sisley</option>
+                  <option>Taylor Swift</option>
+                  <option>Tommy Hilfiger</option>
+                  <option>Vivienne Westwood</option>
+                  <option>Abercrombie & Fitch</option>
+                  <option>Animale</option>
+                  <option>Anna Sui</option>
+                  <option>Antonio Puig</option>
+                  <option>Armaf</option>
+                  <option>Baldessarini</option>
+                  <option>Bentley</option>
+                  <option>Betsey Johnson</option>
+                  <option>Bottega Veneta</option>
+                  <option>Cerruti</option>
+                  <option>Coach</option>
+                  <option>Cuba Paris</option>
+                  <option>David Beckham</option>
+                  <option>Elizabeth and James</option>
+                  <option>Elizabeth Taylor</option>
+                  <option>Escentric Molecules</option>
+                  <option>FCUK</option>
+                  <option>Geoffrey Beene</option>
+                  <option>Ghost</option>
+                  <option>Giorgio Beverly Hills</option>
+                  <option>Gloria Vanderbilt</option>
+                  <option>Gwen Stefani</option>
+                  <option>Halle Berry</option>
+                  <option>Halloween</option>
+                  <option>Harajuku Lovers</option>
+                  <option>Hilary Duff</option>
+                  <option>Houbigant</option>
+                  <option>Jacomo</option>
+                  <option>Jacques Bogart</option>
+                  <option>James Heeley</option>
+                  <option>Jean Charles Brosseau</option>
+                  <option>Jean Desprez</option>
+                  <option>Jimmy Choo</option>
+                  <option>John Galliano</option>
+                  <option>Jovan</option>
+                  <option>Karl Lagerfeld</option>
+                  <option>Kenneth Cole</option>
+                  <option>Kiehl`s</option>
+                  <option>Knize</option>
+                  <option>La Prairie</option>
+                  <option>Lady Gaga</option>
+                  <option>Lattafa Perfumes</option>
+                  <option>Le Couvent des Minimes</option>
+                  <option>Liz Claiborne</option>
+                  <option>Loewe</option>
+                  <option>Mancera</option>
+                  <option>Maurer & Wirtz</option>
+                  <option>Mona di Orio</option>
+                  <option>Nautica</option>
+                  <option>Nikos</option>
+                  <option>Oriflame</option>
+                  <option>Paloma Picasso</option>
+                  <option>Parfums de Marly</option>
+                  <option>Paul Smith</option>
+                  <option>Perfumer`s Workshop</option>
+                  <option>Perry Ellis</option>
+                  <option>Phaedon</option>
+                  <option>Philosophy</option>
+                  <option>Queen Latifah</option>
+                  <option>Rasasi</option>
+                  <option>Reyane Tradition</option>
+                  <option>ScentStory</option>
+                  <option>Sean John</option>
+                  <option>Shulton Company</option>
+                  <option>Slava Zaitsev</option>
+                  <option>Stella McCartney</option>
+                  <option>Tauer Perfumes</option>
+                  <option>The Body Shop</option>
+                  <option>The Vagabond Prince</option>
+                  <option>Tocca</option>
+                  <option>Tommy Bahama</option>
+                  <option>Torrente</option>
+                  <option>Trussardi</option>
+                  <option>Vince Camuto</option>
+              </select>
+            </div>
+          </div>
+
+
+          <div class="weight-group"><p>WEIGHT</p></div>
+          <div id='weight-field'></div>
+
+          <div id="pre_set" style="display:none">
+            <text id="weight_id" font-style="bold"></text>
+                <input class="mdl-slider mdl-js-slider" type="range" min="-5" max="5" value="3" tabindex="0" onmousedown='testfunc(this)'>
+          </div>
+
+          </nav>
+      </div>
+      <main class="content-container mdl-color--white" style="height: 750px;">
+        <div class="mdl-grid demo-content">
+          <div class="mdl-color--white mdl-cell mdl-cell--9-col">
+            <div id="renderer">
+            </div>
+              <div class="color-info" style="display: none">
+                  <div id="genderColor" style="display: none">
+                      <p>
+                          <svg height="5" width="8">
+                            <circle cx="2.5" cy="2.5" r="2.5" fill="#fc821e" />
+                          </svg>
+                          women
+                      </p>
+                      <p>
+                          <svg height="5" width="8">
+                              <circle cx="2.5" cy="2.5" r="2.5" fill="#6383ce" />
+                          </svg>
+                          men
+                      </p>
+                      <p>
+                          <svg height="5" width="8">
+                              <circle cx="2.5" cy="2.5" r="2.5" fill="#2dad36" />
+                          </svg>
+                          women and men
+                      </p>
+                  </div>
+                   <div class="gradient-box">
+                      <svg id="daynightColor" style="display: none"></svg>
+                       <svg id="ratingColor" style="display: none"></svg>
+                   </div>
+                   <div id="brandColor" style="display: none">
+                       <p>
+                           <svg height="5" width="8">
+                               <circle cx="2.5" cy="2.5" r="2.5" fill="#FF689F" />
+                           </svg>
+                           <text id="brand-name">Brand</text>
+                       </p>
+                   </div>
+               </div>
+               <div id="info" class="hidden">
+               <div style="text-align:left">
+                 <g id="brand"></g>
+                 <g id="colorCategory"></g>
+                 <g id="name"></g>
+                 <g id="numeric"></g>
+               </div>
+             </div>
+           </div>
+         </div>
+       </main>
+     </div>
+
+     <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+     <script src="lodash.min.js"></script>
+     <script src="jquery.min.js"></script>
+     <script src="javascripts/drawer.js"></script>
+   </body>
+ </html>
