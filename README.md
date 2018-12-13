@@ -1,6 +1,7 @@
 # Application for IEEE PacificVis 2018  (Perfume-Explorer)
 - This Project is Web based Data Visualization that helps people when they choice the perfume.
 - This visualization is best in 1980X1080 on Chrome browser.
+- 2017 MEDIA CR-DAY the Grand prize.
 - IEEE PacificVis 2018 Visual Storytelling Contest final entry .
 
 ## Using
